@@ -2,6 +2,9 @@ def extract_mulliken_charge(fn, natoms):
     '''
     Function to extract and return the Mulliken charges from an FHI-aims output.
     A list of relative charges is returned, with +q meaning charg depletion and -q meaning charge accummulation
+    A completed fhi-aims mulliken calculation gives information about the charge at the end aims.out file. Usually, it is found under
+    the string 'Summary of the per-atom charge analysis:' and hence we look for this string in the aims.out file and parse the data 
+    after this line using this function
 
     Parameters:
 
@@ -26,7 +29,12 @@ def extract_mulliken_charge(fn, natoms):
 def extract_mulliken_spin(fn, natoms):
     '''
     Function to extract and return the Mulliken spin from an FHI-aims output.
+    A completed fhi-aims mulliken calculation gives information about the spin at the end aims.out file. Usually, it is found under
+    the string 'Summary of the per-atom spin analysis:' and hence we look for this string in the aims.out file and parse the spin data 
+    after this line using this function. This helps to understand the change in initial spins on each atom after the any calculation
+    than the one with which we initialize.
 
+    
     Parameters:
 
     fn: string
@@ -77,6 +85,9 @@ def _get_mulliken_data_line(text, data_identifier):
 def write_dos_to_csv(fname, x, y):
     '''
     Description
+    Writing the density of states (dos) data to csv format which can be later used to plot the dos.
+    DOS calculations can also be done using the output=[dos] functionality of fhi-aims but DOS using mulliken helps to 
+    calculate multiple things in one go.
 
     Parameters:
     fname: String
