@@ -1,10 +1,7 @@
-import os
 from ase.io import read
 import pickle
 import numpy as np
 from pymatgen.analysis.elasticity import  diff_fit
-from pymatgen.io.ase import AseAtomsAdaptor
-from ase.build import make_supercell
 
 def read_strain_tensor_from_pkl(pkl_file):
     with open(pkl_file, 'rb') as fp:
@@ -12,6 +9,8 @@ def read_strain_tensor_from_pkl(pkl_file):
     return strain_tensor
 
 def read_stress_from_outputs(output_file_type=None,aims_out_file=False):
+    import os
+    home = os.getcwd()
     file_ext = ['.traj', '.xyz']
     if output_file_type is not None:
         if output_file_type in file_ext:
