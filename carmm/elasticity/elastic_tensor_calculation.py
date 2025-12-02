@@ -4,20 +4,7 @@ import pickle
 import numpy as np
 from pymatgen.analysis.elasticity import  diff_fit
 from pymatgen.io.ase import AseAtomsAdaptor
-from pymatgen.analysis.elasticity import stress
-from pymatgen.core.structure import Structure
-from pymatgen.analysis.elasticity.elastic import ElasticTensorExpansion
 from ase.build import make_supercell
-home = os.getcwd()
-
-ase_atoms_eq = read('CoO_RS_NM_pri_Opt_rSCAN.traj')
-t = np.array([[-1, 1, 1],[1, -1, 1],[1, 1, -1]])
-ase_atoms_eq = make_supercell(ase_atoms_eq, t)
-
-structure = AseAtomsAdaptor.get_structure(ase_atoms_eq)
-with open('strain_tensor.pkl', 'rb') as fp:
-    strain_tensor = pickle.load(fp)
-
 
 def read_strain_tensor_from_pkl(pkl_file):
     with open(pkl_file, 'rb') as fp:
