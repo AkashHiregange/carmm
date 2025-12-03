@@ -1,5 +1,40 @@
 def generate_deformed_strutures(atoms_object, norm_strains = [0.01, 0.03], shear_strains = [0.01, 0.03], write_strain=True):
+    """
+    Generate a set of deformed atomic structures by applying normal and shear
+    strain to the input structure.
 
+    Parameters
+    ----------
+    atoms_object : ase.Atoms
+        The undeformed equilibrium atomic structure from which strained configurations
+        will be generated.
+    norm_strains : list of float, optional
+        A list of normal strain magnitudes to apply along the principal
+        directions. Each value produces 3 separate deformed structures. For example [0.01] produces three different
+        strain tensor [[0.01,0,0],[0,0,0],[0,0,0]], [[0,0,0],[0,0.01,0],[0,0,0]], [[0,0,0],[0,0,0],[0,0,0.01]]
+        Default is [0.01, 0.03] --> therefore 6 deformed structures due to norm strain.
+    shear_strains : list of float, optional
+        A list of shear strain magnitudes to apply to the off-diagonal
+        components of the strain tensor. Each value produces 3 additional deformed structures.
+        Default is [0.01, 0.03] --> therefore 6 additional deformed structures due to shear strain.
+    write_strain : bool, optional
+        If True (default), write the strain tensor to a pickle file. The default file name is strain_tensor.pkl.
+
+    Returns
+    -------
+    equilibrium structure: Pymatgen.Structure
+    deformed_structures : list of ase.Atoms
+        A list containing all deformed `Atoms` objects generated from the
+        input structure. The list includes both normal and shear strain
+        deformations.
+
+    Notes
+    -----
+    - Normal strains correspond to scaling of lattice vectors and atomic
+      positions along x, y, and z directions.
+    - Shear strains modify lattice angles and introduce off-diagonal
+      distortions.
+    """
     import pickle
     import numpy as np
     from pymatgen.analysis.elasticity import Strain, Deformation
@@ -27,9 +62,9 @@ def generate_deformed_strutures(atoms_object, norm_strains = [0.01, 0.03], shear
         with open('strain_tensor.pkl', 'wb') as fp:
             pickle.dump(strain_tensor, fp)
 
-    return eq_structure, structure, deformations
+    return structure, deformations
 
-def create_files_and_directories(eq_structure, structure, deformations, copy_input_and_submission=False):
+def create_files_and_directories(structure, deformations, copy_input_and_submission=False):
     import os
     import shutil
     from pymatgen.io.ase import AseAtomsAdaptor
@@ -37,7 +72,6 @@ def create_files_and_directories(eq_structure, structure, deformations, copy_inp
 
     for i, def_struc in enumerate(deformed_struct):
         dir_no = i + 1
-        eq_structure_copy = eq_structure.copy()
         directory = f'defor_{dir_no}'
         parent_dir = os.getcwd()
         path_final = os.path.join(parent_dir, directory)
@@ -45,8 +79,7 @@ def create_files_and_directories(eq_structure, structure, deformations, copy_inp
             shutil.rmtree(path_final)
         os.mkdir(path_final)
         atoms = AseAtomsAdaptor.get_atoms(def_struc)
-        eq_structure_copy.set_cell(atoms.get_cell(), scale_atoms=True)
-        eq_structure_copy.write(path_final + '/geometry.in')
+        atoms.write(path_final + '/geometry.in')
         if copy_input_and_submission:
             shutil.copy(parent_dir + '/input.py', path_final + '/input.py')
             shutil.copy(parent_dir + '/submission.script', path_final + '/submission.script')
