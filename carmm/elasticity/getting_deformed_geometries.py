@@ -1,11 +1,9 @@
-import os
-import shutil
-import pickle
-import numpy as np
-from pymatgen.analysis.elasticity import Strain, Deformation
-from pymatgen.io.ase import AseAtomsAdaptor
-
 def generate_deformed_strutures(atoms_object, norm_strains = [0.01, 0.01], shear_strains = [0.01, 0.01], write_strain=True):
+
+    import pickle
+    import numpy as np
+    from pymatgen.analysis.elasticity import Strain, Deformation
+    from pymatgen.io.ase import AseAtomsAdaptor
 
     eq_structure = atoms_object
     structure = AseAtomsAdaptor.get_structure(eq_structure)
@@ -32,6 +30,9 @@ def generate_deformed_strutures(atoms_object, norm_strains = [0.01, 0.01], shear
     return eq_structure, structure, deformations
 
 def create_files_and_directories(eq_structure, structure, deformations, copy_input_and_submission=False):
+    import os
+    import shutil
+    from pymatgen.io.ase import AseAtomsAdaptor
     deformed_struct = [defo.apply_to_structure(structure) for defo in deformations]
 
     for i, def_struc in enumerate(deformed_struct):

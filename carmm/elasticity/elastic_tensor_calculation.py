@@ -1,14 +1,12 @@
-from ase.io import read
-import pickle
-import numpy as np
-from pymatgen.analysis.elasticity import  diff_fit
-
 def read_strain_tensor_from_pkl(pkl_file):
+    import pickle
     with open(pkl_file, 'rb') as fp:
         strain_tensor = pickle.load(fp)
     return strain_tensor
 
 def read_stress_from_outputs(output_file_type=None,aims_out_file=False):
+    from ase.io import read
+    import numpy as np
     import os
     home = os.getcwd()
     file_ext = ['.traj', '.xyz']
@@ -38,35 +36,32 @@ def read_stress_from_outputs(output_file_type=None,aims_out_file=False):
                 for file in os.listdir(f'{home}/{defor}'):
                     if file.endswith('.out'):
                         pass
-                        # f = open(f'{home}/{defor}/{file}', 'r')
-                        # # print(f'{home}/{defor}/')
-                        # # print('reading')
-                        # stress = []
-                        # # manually searching for stress components in aims.out file. Hopefully there is a better way to do it.
-                        # lines = f.readlines()
-                        # search_str = '  |                    Cartesian components [eV/A**3]                 |\n'
-                        # if search_str in lines:
-                        #     # print(lines.index(search_str))
-                        #     index = lines.index(search_str)
-                        #     stress.append(float(lines[index + 4].split()[2]))
-                        #     stress.append(float(lines[index + 4].split()[3]))
-                        #     stress.append(float(lines[index + 4].split()[4]))
-                        #     stress.append(float(lines[index + 5].split()[2]))
-                        #     stress.append(float(lines[index + 5].split()[3]))
-                        #     stress.append(float(lines[index + 5].split()[4]))
-                        #     stress.append(float(lines[index + 6].split()[2]))
-                        #     stress.append(float(lines[index + 6].split()[3]))
-                        #     stress.append(float(lines[index + 6].split()[4]))
-                        #
-                        # try:
-                        #     stress = np.array(stress).reshape(3,3)
-                        #     stress_list.append(stress)
-                        #     # print(stress)
-                        #     f.close()
-                        # except Exception as e:
-                        #     print('Error encountered. See the message below')
-                        #     print(e)
-                        #     f.close()
+                        f = open(f'{home}/{defor}/{file}', 'r')
+                        stress = []
+                        # manually searching for stress components in aims.out file. Hopefully there is a better way to do it.
+                        lines = f.readlines()
+                        search_str = '  |                    Cartesian components [eV/A**3]                 |\n'
+                        if search_str in lines:
+                            index = lines.index(search_str)
+                            stress.append(float(lines[index + 4].split()[2]))
+                            stress.append(float(lines[index + 4].split()[3]))
+                            stress.append(float(lines[index + 4].split()[4]))
+                            stress.append(float(lines[index + 5].split()[2]))
+                            stress.append(float(lines[index + 5].split()[3]))
+                            stress.append(float(lines[index + 5].split()[4]))
+                            stress.append(float(lines[index + 6].split()[2]))
+                            stress.append(float(lines[index + 6].split()[3]))
+                            stress.append(float(lines[index + 6].split()[4]))
+
+                        try:
+                            stress = np.array(stress).reshape(3,3)
+                            stress_list.append(stress)
+                            # print(stress)
+                            f.close()
+                        except Exception as e:
+                            print('Error encountered. See the message below')
+                            print(e)
+                            f.close()
 
         stress_tensor = np.array(stress_list)
 
@@ -78,6 +73,9 @@ def read_stress_from_outputs(output_file_type=None,aims_out_file=False):
 
 
 def compute_elasticity_tensor(strain_tensor,stress_tensor,write_elasticity_tensor=True,write_output=True):
+    import pickle
+    import numpy as np
+    from pymatgen.analysis.elasticity import diff_fit
     elasticity_tensor = diff_fit(strain_tensor, stress_tensor, order=2)
     print(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0] * 160.2716621)
 
