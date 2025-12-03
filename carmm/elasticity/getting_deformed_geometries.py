@@ -1,4 +1,4 @@
-def generate_deformed_strutures(atoms_object, norm_strains = [0.01, 0.01], shear_strains = [0.01, 0.01], write_strain=True):
+def generate_deformed_strutures(atoms_object, norm_strains = [0.01, 0.03], shear_strains = [0.01, 0.03], write_strain=True):
 
     import pickle
     import numpy as np
