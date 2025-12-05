@@ -1,4 +1,25 @@
 def read_strain_tensor_from_pkl(pkl_file):
+    """
+    Load a strain tensor from a pickle (.pkl) file.
+
+    Parameters
+    ----------
+    pkl_file : str
+        Path to the pickle file containing the stored strain tensor.
+        The file is expected to contain either:
+        - a NumPy array of shape (N, 3, 3), where N is the number of deformed structures
+
+    Returns
+    -------
+    strain_tensor : numpy.ndarray or object
+        The strain tensor loaded from the pickle file. In most workflows,
+        this is a Nx3×3 NumPy array representing the strain tensor.
+
+    Notes
+    -----
+    - This function assumes the pickle file was created using the generate_deformed_structures() function with
+      write_strain=True.
+    """
     import pickle
     with open(pkl_file, 'rb') as fp:
         strain_tensor = pickle.load(fp)
