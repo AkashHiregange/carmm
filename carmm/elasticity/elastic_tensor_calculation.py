@@ -13,7 +13,7 @@ def read_strain_tensor_from_pkl(pkl_file):
     -------
     strain_tensor : numpy.ndarray or object
         The strain tensor loaded from the pickle file. In most workflows,
-        this is a Nx3×3 NumPy array representing the strain tensor.
+        this is a Nx3x3 NumPy array representing the strain tensor.
 
     Notes
     -----
@@ -25,32 +25,52 @@ def read_strain_tensor_from_pkl(pkl_file):
         strain_tensor = pickle.load(fp)
     return strain_tensor
 
-def read_stress_from_outputs(output_file_type=None,aims_out_file=False):
+def read_stress_from_outputs(output_file_type='.out'):
+    """
+    Read and extract the stress tensor from simulation output files.
+
+    Parameters
+    ----------
+    output_file_type : str, optional
+        File extension specifying the type of output file to
+        parse. Default is '.out'. Typical values include:
+            - 'traj'        : ASE trajectory file containing stress information
+            - 'xyz'        : XYZ file containing stress information
+        The behavior depends on the implementation of the corresponding parser.
+
+    Returns
+    -------
+    stress : numpy.ndarray
+        A Nx3x3 stress tensor extracted from the N output files. Units depend on the
+        underlying simulation code (e.g., for aims.out --> eV/Å³).
+
+    Notes
+    -----
+    - For ASE trajectory files, the function will typically use
+      `ase.io.read` and access stress via `atoms.get_stress()`.
+    - For aims.out file, the function will manually parse the file to extract the stress tensor.
+    """
+
     from ase.io import read
     import numpy as np
     import os
     home = os.getcwd()
     file_ext = ['.traj', '.xyz']
-    if output_file_type is not None:
-        if output_file_type in file_ext:
-            stress_list = []
-            for defor in os.listdir():
-                if os.path.isdir(f'{home}/{defor}'):
-                    for file in os.listdir(f'{home}/{defor}'):
-                        if file.endswith(output_file_type):
-                            atoms = read(f'{home}/{defor}/{file}')
-                            stress = atoms.get_stress(voigt=False)
-                            stress_list.append(stress)
-        else:
-            raise ValueError(
-                f'The file extension provided is not supported. Please make sure it is one of the following'
-                f'{file_ext}')
+    if output_file_type in file_ext:
+        stress_list = []
+        for defor in os.listdir():
+            if os.path.isdir(f'{home}/{defor}'):
+                for file in os.listdir(f'{home}/{defor}'):
+                    if file.endswith(output_file_type):
+                        atoms = read(f'{home}/{defor}/{file}')
+                        stress = atoms.get_stress(voigt=False)
+                        stress_list.append(stress)
 
         stress_tensor = np.array(stress_list)
 
         return stress_tensor
 
-    elif aims_out_file:
+    elif output_file_type=='.out':
         stress_list = []
         for defor in os.listdir():
             if os.path.isdir(f'{home}/{defor}'):
@@ -89,8 +109,8 @@ def read_stress_from_outputs(output_file_type=None,aims_out_file=False):
         return stress_tensor
 
     else:
-        raise Exception(f'There was an error reading the output file. The arguments passed to the function were '
-              f'{output_file_type=}, {aims_out_file=}. Make sure one of them is set to find an output file.')
+        raise ValueError(
+            f'The file extension provided is not supported. Please make sure it is one of the following [.traj, .xyz, .out]')
 
 
 def compute_elasticity_tensor(strain_tensor,stress_tensor,write_elasticity_tensor=True,write_output=True):
