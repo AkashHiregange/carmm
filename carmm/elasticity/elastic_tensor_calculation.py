@@ -114,6 +114,38 @@ def read_stress_from_outputs(output_file_type='.out'):
 
 
 def compute_elasticity_tensor(strain_tensor,stress_tensor,write_elasticity_tensor=True,write_output=True):
+    """
+    Compute the elasticity tensor from strain and stress tensors.
+
+    Parameters
+    ----------
+    strain_tensor : numpy.ndarray
+        Array of shape (N, 3, 3) containing the applied strain tensors,
+        where N is the number of deformation structures. Each element is a
+        symmetric 3×3 strain tensor.
+    stress_tensor : numpy.ndarray
+        Array of shape (N, 3, 3) containing the resulting stress tensors
+        corresponding to each strain in `strain_tensor`. Units depend on the underlying simulation code.
+    write_elasticity_tensor : bool, optional
+        If True (default), write the computed fourth-rank elasticity tensor
+        (C_{ijkl}) to disk as pickle (.pkl) file.
+    write_output : bool, optional
+        If True (default), print summary information such as the unique values in elasticity tensor,
+         complete strain and stress tensors.
+
+    Returns
+    -------
+    C : numpy.ndarray
+        The fourth-rank elasticity tensor (C_{ijkl})
+
+    Notes
+    -----
+    - The elasticity tensor is computed by solving the linear relation:
+          σ_{ij} = C_{ijkl} ε_{kl} using the Pymatgen functionality diff_fit().
+    - The function assumes small-strain elasticity.
+    - The unique values are printed in output summary because the crystal symmetry causes several
+      elements of the tensor to be equal. Hence, the unique values come in handy when comparing with literature values.
+    """
     import pickle
     import numpy as np
     from pymatgen.analysis.elasticity import diff_fit
@@ -128,7 +160,9 @@ def compute_elasticity_tensor(strain_tensor,stress_tensor,write_elasticity_tenso
             print('The file already exists. Overwriting the file...')
 
         f = open('elasticity_tensor_calculation_output.txt', 'w')
+        f.write('Unique values in elasticity tensor in units of Pascals (Pa).\n')
         f.write(str(np.round(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0],3) * 160.2176621) + '\n')
+        f.write('Unique values in elasticity tensor in units of eV/Å³.\n')
         f.write(str(np.round(np.unique(np.array(elasticity_tensor[0]), return_index=True)[0],3)) + '\n')
         f.write('Elasticity tensor in full. The above values show the unique values in the tensor.\n')
         f.write(str(np.array(elasticity_tensor[0])) + '\n')
